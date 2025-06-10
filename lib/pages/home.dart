@@ -3,10 +3,7 @@ import 'package:flutter_application/model/category_model.dart';
 import 'package:flutter_application/model/foryou_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-void printText() {
-  String message = 'Hello Flutter!';
-  print(message);
-}
+void printText() async {}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,14 +16,20 @@ class _HomePageState extends State<HomePage> {
   List<CategoryModel> categories = [];
   List<ForyouModel> forYou = [];
 
-  void _getData() {
-    categories = CategoryModel.getCategories();
-    forYou = ForyouModel.getForYou();
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  void _getData() async {
+    categories = await CategoryModel.getCategories();
+    forYou = await ForyouModel.getForYou();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    _getData();
     return Scaffold(
       appBar: appBar(),
       backgroundColor: Colors.white,
@@ -37,97 +40,102 @@ class _HomePageState extends State<HomePage> {
           SizedBox(height: 40),
           _categoriesSection(),
           SizedBox(height: 40),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0),
-                child: Text(
-                  'For You',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              SizedBox(
-                height: 240,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.only(left: 20, right: 20),
-                  itemCount: forYou.length,
-                  separatorBuilder: (context, index) => SizedBox(width: 25),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 210,
-                      decoration: BoxDecoration(
-                        color: forYou[index].boxColor.withValues(
-                          alpha: 0.3,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: SvgPicture.asset(forYou[index].iconPath),
-                            ),
-                          ),
-                          Text(
-                            forYou[index].name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                forYou[index].description_1,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                ),
-                              ),
-                               VerticalDivider(
-                                color: Colors.black,
-                                thickness: 0.1,
-                                indent: 10,
-                                endIndent: 10,
-                              ),
-                              Text(
-                                forYou[index].description_2,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+          _forYou(),
         ],
       ),
+    );
+  }
+
+  Column _forYou() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: Text(
+            'For You',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        SizedBox(height: 15),
+        SizedBox(
+          height: 240,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.only(left: 20, right: 20),
+            itemCount: forYou.length,
+            separatorBuilder: (context, index) => SizedBox(width: 25),
+            itemBuilder: (context, index) {
+              return Container(
+                width: 210,
+                decoration: BoxDecoration(
+                  color: forYou[index].boxColor.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: SvgPicture.asset(forYou[index].iconPath),
+                      ),
+                    ),
+                    Text(
+                      forYou[index].name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          forYou[index].price.toString(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          forYou[index].brand,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          forYou[index].category,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -157,6 +165,7 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               return Container(
                 width: 100,
+                padding: EdgeInsets.all(5.0),
                 decoration: BoxDecoration(
                   color: categories[index].boxColor.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
@@ -183,6 +192,7 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.black,
                         fontSize: 14,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

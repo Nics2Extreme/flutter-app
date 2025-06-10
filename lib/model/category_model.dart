@@ -1,35 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 class CategoryModel {
-  String name;
-  String iconPath;
-  Color boxColor;
+  final String name;
+  final String slug;
+  final String url;
+  final String iconPath;
+  final Color boxColor;
 
   CategoryModel({
     required this.name,
+    required this.slug,
+    required this.url,
     required this.iconPath,
     required this.boxColor,
   });
 
-  static List<CategoryModel> getCategories() {
-    List<CategoryModel> categories = [];
+  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    return CategoryModel(
+      name: json['name'],
+      slug: json['slug'],
+      url: json['url'],
+      iconPath: 'assets/icons/pie-chart.svg',
+      boxColor: const Color(0xff598bff),
+    );
+  }
 
-    categories.add(
-      CategoryModel(name: 'Category 1', iconPath: 'assets/icons/date.svg', boxColor: Color(0xffb259ff))
-    );
- 
-    categories.add(
-      CategoryModel(name: 'Category 2', iconPath: 'assets/icons/document.svg', boxColor: Color(0xff598bff))
-    );
- 
-    categories.add(
-      CategoryModel(name: 'Category 3', iconPath: 'assets/icons/histogram.svg', boxColor: Color(0xff59ffe9))
-    );
- 
-    categories.add(
-      CategoryModel(name: 'Category 4', iconPath: 'assets/icons/pie-chart.svg', boxColor: Color(0xff59ff5f))
-    );
- 
-    return categories;
+  static Future<List<CategoryModel>> getCategories() async {
+    const url = 'https://dummyjson.com/products/categories';
+    final dio = Dio();
+
+    try {
+      final response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        
+        return data
+            .map((item) => CategoryModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      throw Exception('Error occurred: $e');
+    }
   }
 }

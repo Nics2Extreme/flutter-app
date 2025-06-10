@@ -1,39 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 class ForyouModel {
-  String name;
-  String iconPath;
-  String description_1;
-  String description_2;
-  Color boxColor;
+  final String name;
+  final String iconPath;
+  final double price;
+  final String brand;
+  final String category;
+  final Color boxColor;
 
   ForyouModel({
     required this.name,
-    required this.description_1,
-    required this.description_2,
     required this.iconPath,
+    required this.price,
+    required this.brand,
+    required this.category,
     required this.boxColor,
   });
 
-  static List<ForyouModel> getForYou(){
-    List<ForyouModel> forYou = [];
-
-    forYou.add(
-      ForyouModel(name: 'For You 1', description_1: 'Smile', description_2: 'Sweet', iconPath: 'assets/icons/date.svg', boxColor: Color(0xff59ffe9))
+  factory ForyouModel.fromJson(Map<String, dynamic> json) {
+    return ForyouModel(
+      name: json['title'],
+      iconPath: 'assets/icons/document.svg',
+      price: json['price'],
+      brand: json['brand'] ?? '',
+      category: json['category'],
+      boxColor: const Color(0xff598bff),
     );
+  }
 
-    forYou.add(
-      ForyouModel(name: 'For You 2', description_1: 'Sadistic', description_2: 'Surpirse', iconPath: 'assets/icons/document.svg', boxColor: Color(0xff9659ff))
-    );
+  static Future<List<ForyouModel>> getForYou() async {
+    const url = "https://dummyjson.com/products?limit=10&skip=10&select=title,price,brand,category";
+    final dio = Dio();
+    
+    try{
+      final response = await dio.get(url);
 
-    forYou.add(
-      ForyouModel(name: 'For You 3', description_1: 'Surpirse', description_2: 'Sadistic', iconPath: 'assets/icons/histogram.svg', boxColor: Color(0xffff596f))
-    );
-
-    forYou.add(
-      ForyouModel(name: 'For You 4', description_1: 'Sweet', description_2: 'Smile', iconPath: 'assets/icons/pie-chart.svg', boxColor: Color(0xffc2ff59))
-    );
-
-    return forYou;
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> productsJson = data['products'];
+        
+        return productsJson
+            .map((item) => ForyouModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      throw Exception('Error occurred: $e');
+    }
   }
 }
