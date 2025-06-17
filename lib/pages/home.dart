@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/model/category_model.dart';
-import 'package:flutter_application/model/foryou_model.dart';
+import 'package:flutter_application/model/product_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_application/layout/layout.dart';
+import 'package:flutter_application/pages/products.dart';
 
 void printText() async {}
 
@@ -14,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<CategoryModel> categories = [];
-  List<ForyouModel> forYou = [];
+  List<ProductModel> products = [];
 
   @override
   void initState() {
@@ -24,42 +26,73 @@ class _HomePageState extends State<HomePage> {
 
   void _getData() async {
     categories = await CategoryModel.getCategories();
-    forYou = await ForyouModel.getForYou();
+    products = await ProductModel.getProducts();
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(),
-      backgroundColor: Colors.white,
-      body: Column(
+    return Layout(
+      title: "Home",
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _searchBar(),
           SizedBox(height: 40),
           _categoriesSection(),
           SizedBox(height: 40),
-          _forYou(),
+          _products(),
         ],
       ),
     );
   }
 
-  Column _forYou() {
+  Column _products() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: Text(
-            'For You',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: Text(
+                'Products',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
+            SizedBox(width: 20.0),
+            ElevatedButton(
+              child: const Text('Show More'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder:
+                        (context, animation, secondaryAnimation) =>
+                            const Products(),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0); // Slide in from the right
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      var offsetAnimation = animation.drive(tween);
+
+                      return SlideTransition(
+                        position: offsetAnimation,
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         SizedBox(height: 15),
         SizedBox(
@@ -67,13 +100,13 @@ class _HomePageState extends State<HomePage> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.only(left: 20, right: 20),
-            itemCount: forYou.length,
+            itemCount: products.length,
             separatorBuilder: (context, index) => SizedBox(width: 25),
             itemBuilder: (context, index) {
               return Container(
                 width: 210,
                 decoration: BoxDecoration(
-                  color: forYou[index].boxColor.withValues(alpha: 0.3),
+                  color: products[index].boxColor.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -88,11 +121,11 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: SvgPicture.asset(forYou[index].iconPath),
+                        child: SvgPicture.asset(products[index].iconPath),
                       ),
                     ),
                     Text(
-                      forYou[index].name,
+                      products[index].name,
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
@@ -104,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          forYou[index].price.toString(),
+                          products[index].price.toString(),
                           style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: Colors.black,
@@ -112,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         Text(
-                          forYou[index].brand,
+                          products[index].brand,
                           style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: Colors.black,
@@ -120,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         Text(
-                          forYou[index].category,
+                          products[index].category,
                           style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: Colors.black,
@@ -252,61 +285,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
-  }
-
-  AppBar appBar() {
-    return AppBar(
-      title: Text(
-        'Title',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0.0,
-      centerTitle: true,
-      leading: GestureDetector(
-        onTap: () {
-          printText(); // Outputs "Hello, Flutter!" to the console
-        },
-        child: Container(
-          margin: EdgeInsets.all(10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Color(0xffF7F8F8),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: SvgPicture.asset(
-            'assets/icons/left-arrow.svg',
-            height: 20,
-            width: 20,
-          ),
-        ),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () {
-            printText(); // Outputs "Hello, Flutter!" to the console
-          },
-          child: Container(
-            margin: EdgeInsets.all(10),
-            alignment: Alignment.center,
-            width: 37,
-            decoration: BoxDecoration(
-              color: Color(0xffF7F8F8),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: SvgPicture.asset(
-              'assets/icons/dots-horizontal.svg',
-              height: 20,
-              width: 20,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
